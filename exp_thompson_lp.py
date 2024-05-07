@@ -12,7 +12,7 @@ import GPy
 
 
 from thompson_lp import TS_episodic, TS_dynamic, TS_Fixed, TS_Update
-from demand_dists import observe_demand_poisson, observe_demand_poisson_v2, observe_demand_negbinom
+from demand_dists import observe_demand_poisson, observe_demand_poisson_v2, observe_demand_negbinom_PA, observe_demand_negbinom_PB
 from utils import save_data
 
 
@@ -94,21 +94,22 @@ class exp():
         # True demand distribution list
         self.true_demand_dist = {'poisson': observe_demand_poisson, 
                                  'poisson_v2': observe_demand_poisson_v2,
-                                  'negbinom': observe_demand_negbinom
+                                  'negbinom_PA': observe_demand_negbinom_PA,
+                                  'negbinom_PB' : observe_demand_negbinom_PB
                                   }
         params = []
         # Initial inventory
         n_t0 = 1000
-        n_t01 = 10
+        n_t01 = 30
         # Number of independent trials.
         n_tri = 25
         # shut-off price
         p_inf = 100000.0
         # Episode length
         n_episodes_gamma = 5000
-        n_episodes_gp = 20
+        n_episodes_gp = 200
         # If False, use cvxopt to solve the LP instead of Gurobi.
-        use_gurobi = True
+        use_gurobi = False
         # Number of CPUs used for parallel computing.  
         processes = 1
 
@@ -141,32 +142,60 @@ class exp():
                         'experiment_id': np.random.randint(0, 2 ** 32 -1),
                         'dist_param': dist_param_gp, # If you use Gamma prior, use "dist_param_gamma" instead.
                         'range_n_episodes': range(n_episodes_gp), # If you use Gamma prior, use "n_episode_gamma" instead. 
-                        'id_prefix': f'gp_Poisson'
+                        'id_prefix': f'gp_poisson'
                         }
 
-        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n50_LPE' + f'_T{upper_t}',
-                                'seeds': [ _ for _ in range(param_common['n_trials'])],
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n1000_LPE' + f'_T{upper_t}',
+                                'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
+                                'n_t0': n_t0,
+                                'agent': 'TSE'
+                                },
+                            **param_common)
+                            ) 
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n1000_LPD'  + f'_T{upper_t}',
+                                 'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
+                                 'n_t0': n_t0, 
+                                 'agent': 'TSD' 
+                                 },
+                             **param_common)
+                        )
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n1000_TSF'  + f'_T{upper_t}',
+                                'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
+                                'n_t0': n_t0,
+                                'agent': 'TSF'
+                                },
+                            **param_common)
+                             ) 
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n1000_TSU'  + f'_T{upper_t}',
+                                'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
+                                'n_t0': n_t0,
+                                'agent': 'TSU'}
+                                ,
+                            **param_common)
+                            )
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n30_LPE' + f'_T{upper_t}',
+                                'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
                                 'n_t0': n_t01,
                                 'agent': 'TSE'
                                 },
                             **param_common)
                             ) 
-        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n50_LPD'  + f'_T{upper_t}',
-                                 'seeds': [ _ for _ in range(param_common['n_trials'])],
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n30_LPD'  + f'_T{upper_t}',
+                                 'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
                                  'n_t0': n_t01, 
                                  'agent': 'TSD' 
                                  },
                              **param_common)
                         )
-        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n50_TSF'  + f'_T{upper_t}',
-                                'seeds': [ _ for _ in range(param_common['n_trials'])],
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n30_TSF'  + f'_T{upper_t}',
+                                'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
                                 'n_t0': n_t01,
                                 'agent': 'TSF'
                                 },
                             **param_common)
-                            ) 
-        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n50_TSU'  + f'_T{upper_t}',
-                                'seeds': [ _ for _ in range(param_common['n_trials'])],
+                             ) 
+        params.append(dict(**{'id': f'{param_common["experiment_id"]}_{param_common["id_prefix"]}_n30_TSU'  + f'_T{upper_t}',
+                                'seeds': [ np.random.randint(0, 2 ** 32 -1) for _ in range(param_common['n_trials'])],
                                 'n_t0': n_t01,
                                 'agent': 'TSU'}
                                 ,

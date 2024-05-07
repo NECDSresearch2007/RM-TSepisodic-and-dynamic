@@ -8,8 +8,8 @@ from multiprocessing import Pool
 import numpy as np
 
 from thompson_lp import TS_episodic, TS_episodic_oracle, TS_dynamic_oracle
-from demand_dists import observe_demand_poisson, observe_demand_poisson_v2, observe_demand_negbinom
-from demand_dists import true_lamb_poisson, true_lamb_poisson_v2, true_mean_demand
+from demand_dists import observe_demand_poisson, observe_demand_poisson_v2, observe_demand_negbinom_PA, observe_demand_negbinom_PB
+from demand_dists import true_lamb_poisson, true_lamb_poisson_v2, true_mean_demand_PA, true_mean_demand_PB
 from utils import save_data
 
 
@@ -75,28 +75,30 @@ class exp():
         # Set true_demand parameter of the demand distribution.
         self.true_demand_dist = {'poisson': observe_demand_poisson, 
                                  'poisson_v2': observe_demand_poisson_v2,
-                                  'negbinom': observe_demand_negbinom
+                                  'negbinom_PA': observe_demand_negbinom_PA,
+                                  'negbinom_PB': observe_demand_negbinom_PB
                                   }
         # Set true_mean_demand the oracle algorithms use
         self.true_demand = {'poisson': true_lamb_poisson, 
                                  'poisson_v2': true_lamb_poisson_v2,
-                                  'negbinom': true_mean_demand
+                                  'negbinom_PA': true_mean_demand_PA,
+                                  'negbinom_PB':true_mean_demand_PB
                                   }
 
         params = []
         # Initial inventory
         n_t0 = 1000
-        n_t1 = 50
+        n_t1 = 30
         # the number of independent trial
-        n_tri = 10
+        n_tri = 10000
         # shut-off price
         p_inf = 100000.0
         # number of episodes
         n_episodes = 1
         # If False, use cvxopt to solve the LP instead of Gurobi.
-        use_gurobi = True
+        use_gurobi = False
         # Number of CPUs used for parallel computing. 
-        processes = 1
+        processes = 5
 
         dist_param = {'upper_x0':upper_x0}
         

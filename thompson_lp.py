@@ -285,9 +285,8 @@ class TS_episodic:
             if k[cnt_d] >= upper_k:
                 continue
             idx = cnt_t[cnt_d] * upper_k + k[cnt_d]
-            lamb_dist['a'][idx] += 1.0 
+            lamb_dist['a'][idx] += lamb_dist['n']
             lamb_dist['b'][idx] += upper_d[cnt_d]
-        
         return lamb_dist
     
     @classmethod
@@ -422,10 +421,6 @@ class TS_episodic:
                     range_p, range_t, slice(None), lamb_dist,
                     dist_param, dist_type, random_state)
                 
-                
-                # A sampled probability is the success probability
-                if dist_type == "beta":
-                    lamb_sample = (1 - lamb_sample) / lamb_sample
                 # Optimize prices given sampled demand
                 x, x_status = cls._calc_x(
                     lamb_sample, upper_k, n_t, range_p, range_t, 
